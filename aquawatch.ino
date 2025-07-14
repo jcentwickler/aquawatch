@@ -11,11 +11,15 @@ void setupLCD(){
   lcd.backlight();
   lcd.setCursor(4,0);   
   lcd.print("AquaWatch");
-  lcd.setCursor(2,1);
+  lcd.setCursor(1,1);
   lcd.print("Encendiendo...");
-  delay(5000);
+  delay(3000);
   lcd.setCursor(2,1);
-  lcd.print("");
+  lcd.clear();
+  lcd.setCursor(4,0);   
+  lcd.print("AquaWatch");
+  lcd.setCursor(1,1);
+  lcd.print("Sistema Activo");
 }
 
 // 3. FLOAT SWITCH - SENSOR DE NIVEL DE AGUA FLOTADOR
@@ -45,18 +49,20 @@ void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
   if (estadoActual != ultimoEstadoMostrado) {
     lcd.clear();
     if (estadoActual == 1) {
-      lcd.setCursor(2, 0);
-      lcd.print("Nivel de Agua");
-      lcd.setCursor(4, 1);
-      lcd.print("Alto");
+      lcd.setCursor(1, 0);
+      lcd.print("Nivel de Agua:");
+      lcd.setCursor(5, 1);
+      lcd.print("Maximo");
     } else if (estadoActual == 0) {
-      lcd.setCursor(2, 0);
-      lcd.print("Nivel de Agua");
-      lcd.setCursor(4, 1);
+      lcd.setCursor(1, 0);
+      lcd.print("Nivel de Agua:");
+      lcd.setCursor(6, 1);
       lcd.print("Bajo");
     } else if (estadoActual == -1){
         lcd.setCursor(4,0);   
         lcd.print("AquaWatch");
+        lcd.setCursor(1,1);
+        lcd.print("Sistema Activo");
     }
     ultimoEstadoMostrado = estadoActual;
   }
@@ -78,6 +84,7 @@ void loopFloatSwitch() {
 #define PIN_MOTOR_DC 9
 
 int humedad = 0;
+bool yaRiego = false;
 
 void setupSensorDeHumedad() {
     pinMode(PIN_POWER_SENSOR_HUMEDAD, OUTPUT);
@@ -90,14 +97,22 @@ void loopSensorDeHumedad() {
     digitalWrite(PIN_POWER_SENSOR_HUMEDAD, HIGH);
     delay(10);
     humedad = analogRead(PIN_HUMEDAD);
-    digitalWrite(PIN_POWER_SENSOR_HUMEDAD, LOW); //Apagar el sensor para evitar corrosion del metal
     Serial.println(humedad);
-    digitalWrite(PIN_MOTOR_DC, LOW);
 
-    if (humedad < 400){
-        digitalWrite(PIN_MOTOR_DC, HIGH);
+    if (humedad < 400 && !yaRiego){
+        digitalWrite(PIN_MOTOR_DC, HIGH);  // Encender motor
+        delay(5000); // Mantenerlo encendido por 5 segundos
+        digitalWrite(PIN_MOTOR_DC, LOW); // Apagar motor después de 5 segundos
+        yaRiego = true;  // Marcar que ya regó
+
+    } 
+
+    if (humedad >= 400) {
+        digitalWrite(PIN_MOTOR_DC, LOW);
+        delay(500);
+        yaRiego = false;
     }
-    delay(100);
+    
 }
 
 // 5. CODIGO PRINCIPAL
