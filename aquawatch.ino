@@ -93,27 +93,32 @@ void setupSensorDeHumedad() {
     pinMode(PIN_MOTOR_DC, OUTPUT);
 }
 
-void loopSensorDeHumedad() {
+vvoid loopSensorDeHumedad() {
     digitalWrite(PIN_POWER_SENSOR_HUMEDAD, HIGH);
     delay(10);
     humedad = analogRead(PIN_HUMEDAD);
+    Serial.print("Humedad: ");
     Serial.println(humedad);
 
-    if (humedad < 400 && !yaRiego){
+    // Leer el flotador inferior
+    int estadoFlotadorInferior = digitalRead(PIN_FLOTADOR_INFERIOR);
+
+    // Condición: humedad baja Y hay agua (flotador inferior en HIGH)
+    if (humedad < 400 && !yaRiego && estadoFlotadorInferior == HIGH) {
         digitalWrite(PIN_MOTOR_DC, HIGH);  // Encender motor
-        delay(5000); // Mantenerlo encendido por 5 segundos
-        digitalWrite(PIN_MOTOR_DC, LOW); // Apagar motor después de 5 segundos
-        yaRiego = true;  // Marcar que ya regó
+        delay(5000);                        // Mantenerlo encendido por 5 segundos
+        digitalWrite(PIN_MOTOR_DC, LOW);    // Apagar motor
+        yaRiego = true;
+    }
 
-    } 
-
+    // Si ya no está seco, permitir riego nuevamente en el futuro
     if (humedad >= 400) {
         digitalWrite(PIN_MOTOR_DC, LOW);
         delay(500);
         yaRiego = false;
     }
-    
 }
+
 
 // 5. CODIGO PRINCIPAL
 void setup() {
