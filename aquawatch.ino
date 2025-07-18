@@ -23,6 +23,7 @@ void setupLCD(){
 }
 
 void LCDHome(){
+  lcd.clear();
   lcd.setCursor(4,0);   
   lcd.print("AquaSmart");
   lcd.setCursor(1,1);
@@ -30,9 +31,10 @@ void LCDHome(){
 }
 
 void LCDRegando(){
+  lcd.clear();
   lcd.setCursor(4,0);   
   lcd.print("AquaSmart");
-  lcd.setCursor(1,1);
+  lcd.setCursor(3,1);
   lcd.print("Regando...");
 }
 
@@ -112,7 +114,7 @@ void loopSensorDeHumedad() {
         delay(10000);                        // Mantenerlo encendido por 10 segundos
         LCDHome();
         digitalWrite(PIN_MOTOR_DC, LOW);    // Apagar motor
-        delay(5000);                        // Esperar 5 segundos antes de la siguiente lectura
+        delay(15000);                        // Esperar 15 segundos antes de la siguiente lectura
     }
 }
 
