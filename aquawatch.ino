@@ -22,13 +22,27 @@ void setupLCD(){
   lcd.print("Sistema Activo");
 }
 
+void LCDHome(){
+  lcd.setCursor(4,0);   
+  lcd.print("AquaSmart");
+  lcd.setCursor(1,1);
+  lcd.print("Sistema Activo");
+}
+
+void LCDRegando(){
+  lcd.setCursor(4,0);   
+  lcd.print("AquaSmart");
+  lcd.setCursor(1,1);
+  lcd.print("Regando...");
+}
+
 // 3. FLOAT SWITCH - SENSOR DE NIVEL DE AGUA FLOTADOR
 #define PIN_FLOTADOR_SUPERIOR 13
 #define PIN_FLOTADOR_INFERIOR 10
 
 void setupFloatSwitch() {
   pinMode(PIN_FLOTADOR_SUPERIOR, INPUT);
-  pinMode(PIN_FLOTADOR_INFERIOR, INPUT);
+  pinMode(PIN_FLOTADOR_INFERIOR, INPUT_PULLUP);
 }
 
 void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
@@ -49,14 +63,13 @@ void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
       lcd.print("Nivel de Agua:");
       lcd.setCursor(5, 1);
       lcd.print("Maximo");
-    } 
-    
-    /*else if (estadoActual == 0) {
+    }   
+    else if (estadoActual == 0) {
       lcd.setCursor(1, 0);
       lcd.print("Nivel de Agua:");
       lcd.setCursor(6, 1);
-      lcd.print("Bajo"); */
-    } else if (estadoActual == -1){
+      lcd.print("Bajo"); 
+    }  else if (estadoActual == -1){
         lcd.setCursor(4,0);   
         lcd.print("AquaWatch");
         lcd.setCursor(1,1);
@@ -69,17 +82,14 @@ void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
 void loopFloatSwitch() {
   int lecturaFlotadorSuperior = digitalRead(PIN_FLOTADOR_SUPERIOR);
   int lecturaFlotadorInferior = digitalRead(PIN_FLOTADOR_INFERIOR);
-
   LCDFloatSwitch(lecturaFlotadorSuperior, lecturaFlotadorInferior);
-
 }
 
 //4. SENSOR DE HUMEDAD
 #define PIN_HUMEDAD A0
-#define PIN_MOTOR_DC 9
+#define PIN_MOTOR_DC 3
 
 int humedad = 0;
-bool yaRiego = false;
 
 void setupSensorDeHumedad() {
     pinMode(PIN_HUMEDAD, INPUT);
@@ -96,30 +106,25 @@ void loopSensorDeHumedad() {
     int estadoFlotadorInferior = digitalRead(PIN_FLOTADOR_INFERIOR);
 
     // Condición: humedad baja Y hay agua (flotador inferior en HIGH)
-    if (humedad < 400 && !yaRiego && estadoFlotadorInferior == HIGH) {
+    if (humedad > 400 && estadoFlotadorInferior == HIGH) {
         digitalWrite(PIN_MOTOR_DC, HIGH);  // Encender motor
-        delay(5000);                        // Mantenerlo encendido por 5 segundos
+        LCDRegando();
+        delay(10000);                        // Mantenerlo encendido por 10 segundos
+        LCDHome();
         digitalWrite(PIN_MOTOR_DC, LOW);    // Apagar motor
-        yaRiego = true;
-    }
-
-    // Si ya no está seco, permitir riego nuevamente en el futuro
-    if (humedad >= 400) {
-        digitalWrite(PIN_MOTOR_DC, LOW);
-        delay(500);
-        yaRiego = false;
+        delay(5000);                        // Esperar 5 segundos antes de la siguiente lectura
     }
 }
 
-
 // 5. CODIGO PRINCIPAL
 void setup() {
+  Serial.begin(9600);
   setupFloatSwitch();
   setupLCD();
-  //setupSensorDeHumedad();
+  setupSensorDeHumedad();
 }
 
 void loop() {
   loopFloatSwitch();
-  //loopSensorDeHumedad();
+  loopSensorDeHumedad();
 }
