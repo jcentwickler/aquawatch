@@ -2,7 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 // 2. LCD
-LiquidCrystal_I2C lcd(0x20,16,2);
+LiquidCrystal_I2C lcd(0x27,16,2);
 int ultimoEstadoMostrado = -1;
 
 void setupLCD(){
@@ -10,29 +10,25 @@ void setupLCD(){
   lcd.clear();
   lcd.backlight();
   lcd.setCursor(4,0);   
-  lcd.print("AquaWatch");
+  lcd.print("AquaSmart");
   lcd.setCursor(1,1);
   lcd.print("Encendiendo...");
   delay(3000);
   lcd.setCursor(2,1);
   lcd.clear();
   lcd.setCursor(4,0);   
-  lcd.print("AquaWatch");
+  lcd.print("AquaSmart");
   lcd.setCursor(1,1);
   lcd.print("Sistema Activo");
 }
 
 // 3. FLOAT SWITCH - SENSOR DE NIVEL DE AGUA FLOTADOR
 #define PIN_FLOTADOR_SUPERIOR 13
-#define PIN_FLOTADOR_INFERIOR 12
-const int SALIDA_FLOTADOR_SUPERIOR = 11;
-const int SALIDA_FLOTADOR_INFERIOR = 10;
+#define PIN_FLOTADOR_INFERIOR 10
 
 void setupFloatSwitch() {
   pinMode(PIN_FLOTADOR_SUPERIOR, INPUT);
   pinMode(PIN_FLOTADOR_INFERIOR, INPUT);
-  pinMode(SALIDA_FLOTADOR_SUPERIOR, OUTPUT);
-  pinMode(SALIDA_FLOTADOR_INFERIOR, OUTPUT);
 }
 
 void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
@@ -53,11 +49,13 @@ void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
       lcd.print("Nivel de Agua:");
       lcd.setCursor(5, 1);
       lcd.print("Maximo");
-    } else if (estadoActual == 0) {
+    } 
+    
+    /*else if (estadoActual == 0) {
       lcd.setCursor(1, 0);
       lcd.print("Nivel de Agua:");
       lcd.setCursor(6, 1);
-      lcd.print("Bajo");
+      lcd.print("Bajo"); */
     } else if (estadoActual == -1){
         lcd.setCursor(4,0);   
         lcd.print("AquaWatch");
@@ -71,31 +69,25 @@ void LCDFloatSwitch(int lecturaSuperior, int lecturaInferior) {
 void loopFloatSwitch() {
   int lecturaFlotadorSuperior = digitalRead(PIN_FLOTADOR_SUPERIOR);
   int lecturaFlotadorInferior = digitalRead(PIN_FLOTADOR_INFERIOR);
-  digitalWrite(SALIDA_FLOTADOR_SUPERIOR, (lecturaFlotadorSuperior == HIGH) ? HIGH : LOW);
-  digitalWrite(SALIDA_FLOTADOR_INFERIOR, (lecturaFlotadorInferior == HIGH) ? HIGH : LOW);
 
   LCDFloatSwitch(lecturaFlotadorSuperior, lecturaFlotadorInferior);
 
 }
 
 //4. SENSOR DE HUMEDAD
-#define PIN_POWER_SENSOR_HUMEDAD A0 
-#define PIN_HUMEDAD A1
+#define PIN_HUMEDAD A0
 #define PIN_MOTOR_DC 9
 
 int humedad = 0;
 bool yaRiego = false;
 
 void setupSensorDeHumedad() {
-    pinMode(PIN_POWER_SENSOR_HUMEDAD, OUTPUT);
     pinMode(PIN_HUMEDAD, INPUT);
     Serial.begin(9600);
     pinMode(PIN_MOTOR_DC, OUTPUT);
 }
 
-vvoid loopSensorDeHumedad() {
-    digitalWrite(PIN_POWER_SENSOR_HUMEDAD, HIGH);
-    delay(10);
+void loopSensorDeHumedad() {
     humedad = analogRead(PIN_HUMEDAD);
     Serial.print("Humedad: ");
     Serial.println(humedad);
@@ -124,10 +116,10 @@ vvoid loopSensorDeHumedad() {
 void setup() {
   setupFloatSwitch();
   setupLCD();
-  setupSensorDeHumedad();
+  //setupSensorDeHumedad();
 }
 
 void loop() {
   loopFloatSwitch();
-  loopSensorDeHumedad();
+  //loopSensorDeHumedad();
 }
